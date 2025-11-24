@@ -12,7 +12,13 @@ function getRandomInt(min, max) {
 async function doFill() {
   console.log(new Date().toISOString(), 'Starting form fill');
   const headless = process.env.HEADLESS === 'true' || false;
-  const browser = await puppeteer.launch({ headless });
+  const launchOptions = { headless };
+  // On CI runners (GitHub Actions) the Chromium sandbox is not usable.
+  // Add these flags when running headless or on CI to avoid sandbox launch failures.
+  if (process.env.CI === 'true' || headless) {
+    launchOptions.args = ['--no-sandbox', '--disable-setuid-sandbox'];
+  }
+  const browser = await puppeteer.launch(launchOptions);
   try {
     const page = await browser.newPage();
     await page.goto('https://forms.zohopublic.in/Kalvium/form/Signup/formperma/GeJFMLBDfoWlIJfhI46Qyx0Dlf3kHhMSRsvMItq_Riw');
